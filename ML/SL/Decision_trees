@@ -1,0 +1,58 @@
+"""
+决策树
+采用树形结构进行决策分类
+自顶端向下的递归方式，从根节点开始，在内部节点进行属性值的比较，并根据结果将样本分配到
+不同的子节点，直到达到叶节点，即最终分类结果，决策树的每一个节点代表一个对象，树枝代表的
+可能是分类属性，而每个树叶则对应从根节点到该树叶所经历的路径表示的对象的值
+
+"""
+
+from matplotlib import pyplot as plt
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.tree import plot_tree
+
+
+iris = load_iris()
+x = iris.data
+y = iris.target
+x = x[:,[2,3]]
+
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.3, random_state = 42)
+
+clf = DecisionTreeClassifier(max_depth=2)
+
+clf.fit(x_train, y_train)
+
+y_pred = clf.predict(x_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f"模型准确率{accuracy}")
+
+h = 0.02
+x_min, x_max = x[:,0].min() - 1,x[:,0].max() + 1
+y_min, y_max = x[:,1].min() - 1,x[:,1].max() + 1
+xx,yy = np.meshgrid(np.arange(x_min, x_max, h),np.arange(y_min, y_max, h))
+z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+
+z = z.reshape(xx.shape)
+
+plt.contourf(xx, yy, z, alpha=0.4)
+plt.scatter(x[:, 0], x[:, 1], c=y, alpha=0.8)
+plt.xlabel('Petal Length')
+plt.ylabel('Petal Width')
+plt.title('Decision Tree Classification on Iris Dataset')
+plt.show()
+
+
+plt.rcParams['figure.dpi'] = 300
+
+plt.figure(figsize=(12, 8))
+plot_tree(clf, feature_names=iris.feature_names, class_names=iris.target_names, filled=True)
+plt.title("Decision Tree Visualization for Iris Dataset")
+
+plt.show()
